@@ -1,0 +1,540 @@
+openapi: 3.0.3
+info:
+  title: Gondor Projects API
+  description: Projects microservice for the Gondor platform
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8002
+    description: Local development
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      tags: [System]
+      responses:
+        '200':
+          description: Service is healthy
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      tags: [System]
+      responses:
+        '200':
+          description: Prometheus metrics
+
+  /v1/projects:
+    get:
+      summary: List projects
+      tags: [Projects]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema: { type: integer, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, default: 20 }
+        - name: search
+          in: query
+          schema: { type: string }
+        - name: company_id
+          in: query
+          schema: { type: integer }
+        - name: status
+          in: query
+          schema: { type: string, enum: [active, completed, cancelled, on_hold] }
+        - name: sort_by
+          in: query
+          schema: { type: string }
+        - name: sort_order
+          in: query
+          schema: { type: string, enum: [asc, desc] }
+      responses:
+        '200':
+          description: Paginated list of projects
+    post:
+      summary: Create a project
+      tags: [Projects]
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+      responses:
+        '201':
+          description: Project created
+
+  /v1/projects/{id}:
+    get:
+      summary: Get project by ID
+      tags: [Projects]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Project details
+        '404':
+          description: Not found
+    put:
+      summary: Update project
+      tags: [Projects]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdate'
+      responses:
+        '200':
+          description: Project updated
+    delete:
+      summary: Delete project
+      tags: [Projects]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Project deleted
+
+  /v1/projects/{id}/tasks:
+    get:
+      summary: List tasks for a project
+      tags: [Tasks]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: page
+          in: query
+          schema: { type: integer }
+        - name: page_size
+          in: query
+          schema: { type: integer }
+        - name: status
+          in: query
+          schema: { type: string }
+        - name: search
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          description: Paginated list of tasks
+    post:
+      summary: Create a task
+      tags: [Tasks]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+      responses:
+        '201':
+          description: Task created
+
+  /v1/projects/{id}/tasks/{task_id}:
+    get:
+      summary: Get task by ID
+      tags: [Tasks]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: task_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Task details
+    put:
+      summary: Update task
+      tags: [Tasks]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: task_id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+      responses:
+        '200':
+          description: Task updated
+    delete:
+      summary: Delete task
+      tags: [Tasks]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: task_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Task deleted
+
+  /v1/projects/{id}/phases:
+    get:
+      summary: List phases for a project
+      tags: [Phases]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: List of phases
+    post:
+      summary: Create a phase
+      tags: [Phases]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhaseCreate'
+      responses:
+        '201':
+          description: Phase created
+
+  /v1/projects/{id}/phases/{phase_id}:
+    put:
+      summary: Update phase
+      tags: [Phases]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: phase_id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PhaseUpdate'
+      responses:
+        '200':
+          description: Phase updated
+    delete:
+      summary: Delete phase
+      tags: [Phases]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: phase_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Phase deleted
+
+  /v1/projects/{id}/members:
+    get:
+      summary: List project members
+      tags: [Members]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: List of members
+    post:
+      summary: Add member to project
+      tags: [Members]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MemberCreate'
+      responses:
+        '201':
+          description: Member added
+
+  /v1/projects/{id}/members/{member_id}:
+    delete:
+      summary: Remove member from project
+      tags: [Members]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: member_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Member removed
+
+  /v1/projects/{id}/deliverables:
+    get:
+      summary: List deliverables for a project
+      tags: [Deliverables]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: List of deliverables
+    post:
+      summary: Create a deliverable
+      tags: [Deliverables]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliverableCreate'
+      responses:
+        '201':
+          description: Deliverable created
+
+  /v1/projects/{id}/deliverables/{deliverable_id}:
+    put:
+      summary: Update deliverable
+      tags: [Deliverables]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: deliverable_id
+          in: path
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeliverableUpdate'
+      responses:
+        '200':
+          description: Deliverable updated
+    delete:
+      summary: Delete deliverable
+      tags: [Deliverables]
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer }
+        - name: deliverable_id
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Deliverable deleted
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ProjectCreate:
+      type: object
+      required: [name, company_id]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        company_id: { type: integer }
+        project_type: { type: string }
+        status: { type: string, enum: [active, completed, cancelled, on_hold] }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        budget: { type: number }
+        currency: { type: string }
+
+    ProjectUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        project_type: { type: string }
+        status: { type: string }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        budget: { type: number }
+        currency: { type: string }
+
+    TaskCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        assignee_id: { type: integer }
+        status: { type: string, enum: [pending, in_progress, completed, cancelled] }
+        priority: { type: string, enum: [low, medium, high, critical] }
+        start_date: { type: string, format: date }
+        due_date: { type: string, format: date }
+        estimated_hours: { type: number }
+        parent_id: { type: integer }
+
+    TaskUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        assignee_id: { type: integer }
+        status: { type: string }
+        priority: { type: string }
+        start_date: { type: string, format: date }
+        due_date: { type: string, format: date }
+        estimated_hours: { type: number }
+        actual_hours: { type: number }
+        parent_id: { type: integer }
+
+    PhaseCreate:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        order: { type: integer }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        status: { type: string }
+
+    PhaseUpdate:
+      type: object
+      properties:
+        name: { type: string }
+        description: { type: string }
+        order: { type: integer }
+        start_date: { type: string, format: date }
+        end_date: { type: string, format: date }
+        status: { type: string }
+
+    MemberCreate:
+      type: object
+      required: [user_id]
+      properties:
+        user_id: { type: integer }
+        role: { type: string, enum: [pm, team_member, stakeholder, client] }
+
+    DeliverableCreate:
+      type: object
+      required: [name]
+      properties:
+        task_id: { type: integer }
+        name: { type: string }
+        description: { type: string }
+        status: { type: string }
+        due_date: { type: string, format: date }
+
+    DeliverableUpdate:
+      type: object
+      properties:
+        task_id: { type: integer }
+        name: { type: string }
+        description: { type: string }
+        status: { type: string }
+        due_date: { type: string, format: date }
